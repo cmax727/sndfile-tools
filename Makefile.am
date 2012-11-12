@@ -9,7 +9,8 @@ bin_PROGRAMS = bin/sndfile-generate-chirp bin/sndfile-spectrogram \
 	bin/sndfile-waveform
 
 # Test programs or programs not yet working.
-noinst_PROGRAMS = src/kaiser_window_test bin/sndfile-pitch-infer bin/sndfile-beat-detect
+noinst_PROGRAMS = tests/kaiser_window_test tests/common_tests src/sndfile-pitch-infer \
+		bin/sndfile-beat-detect
 
 INCLUDES = $(SNDFILE_CFLAGS) $(FFTW3_CFLAGS) $(CAIRO_CFLAGS) $(JACK_CFLAGS) \
 			$(SAMPLERATE_CFLAGS)
@@ -22,7 +23,7 @@ man_MANS = man/sndfile-generate-chirp.1 man/sndfile-spectrogram.1 \
 #=========================================================================================
 # The bin targets.
 
-bin_sndfile_generate_chirp_SOURCES = src/generate-chirp.c
+bin_sndfile_generate_chirp_SOURCES = src/generate-chirp.c src/common.c src/common.h
 bin_sndfile_generate_chirp_LDADD = $(SNDFILE_LIBS)
 
 bin_sndfile_spectrogram_SOURCES = src/spectrogram.c src/window.c src/common.c \
@@ -38,7 +39,7 @@ bin_sndfile_waveform_LDADD = $(SNDFILE_LIBS) $(CAIRO_LIBS)
 bin_sndfile_jackplay_SOURCES = src/jackplay.c
 bin_sndfile_jackplay_LDADD = $(SNDFILE_LIBS) $(JACK_LIBS)
 
-bin_sndfile_resample_SOURCES = src/resample.c
+bin_sndfile_resample_SOURCES = src/resample.c src/common.c src/common.h
 bin_sndfile_resample_LDADD = $(SNDFILE_LIBS) $(SAMPLERATE_LIBS)
 
 bin_sndfile_beat_detect_SOURCES = src/beat-detect.c src/common.h src/fir_hilbert_coeffs.h
@@ -58,8 +59,12 @@ src/beat-detect.o : src/fir_hilbert_coeffs.h
 #=========================================================================================
 # The make check targets.
 
-src_kaiser_window_test_SOURCES = src/kaiser_window_test.c src/window.h src/window.c
+tests_kaiser_window_test_SOURCES = tests/kaiser_window_test.c src/window.h src/window.c
+
+tests_common_tests_SOURCES = tests/common_tests.c src/common.c src/common.h
+tests_common_tests_LDADD = $(SNDFILE_LIBS) $(FFTW3_LIBS)
 
 check : $(noinst_PROGRAMS) $(bin_PROGRAMS)
-	@src/kaiser_window_test
+	@tests/common_tests
+	@tests/kaiser_window_test
 	@tests/valgrind-test.sh
